@@ -10,12 +10,29 @@ where P: AsRef<Path>, {
     Ok(io::BufReader::new(file).lines())
 }
 
-fn get_digits(chars: std::str::Chars) -> Vec<u32> {
+static DIGITS: [&str ; 9] = [
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
+];
+
+fn is_str_digit(s: &str) -> Option<u32> {
+    for (i, x) in DIGITS.iter().enumerate() {
+        if s.starts_with(x) {
+            return Some (i as u32 + 1)
+        }
+    }
+    None
+}
+
+fn is_ascii_digit(c: char) -> Option<u32> {
+    c.to_digit(10)
+}
+
+fn get_digits(line: &str) -> Vec<u32> {
     let mut ret:Vec<u32> = Vec::new();
 
-    for byte in chars {
-        if byte.is_ascii_digit() {
-            ret.push(byte.to_digit(10).unwrap())
+    for (i, c) in line.chars().enumerate() {
+        if let Some(b) = is_ascii_digit(c).or(is_str_digit(&line[i..])) {
+            ret.push(b);
         }
     }
 
@@ -31,7 +48,7 @@ fn main() -> io::Result<()> {
 
     for line in lines {
         let line = line?;
-        let digits = get_digits(line.chars());
+        let digits = get_digits(&line);
 
         ret.push(digits[0] * 10 + digits.last().unwrap());
     }
