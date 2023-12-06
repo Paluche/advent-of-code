@@ -1,8 +1,4 @@
-#! /usr/bin/env python3
-
 """ Day one of Advent of code."""
-
-from argparse import ArgumentParser, FileType
 
 DIGITS_STR = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
               'nine']
@@ -28,16 +24,11 @@ def compute_line(line, part_two):
     return digits[0] * 10 + digits[-1]
 
 
-def __main__():
-    parser = ArgumentParser(description=__doc__)
-
-    parser.add_argument(dest='input', type=FileType(encoding='utf-8'))
-    parser.add_argument('--part-two', action='store_true')
-
-    args = parser.parse_args()
-
-    print(sum(compute_line(line, args.part_two) for line in args.input))
+def part1(lines):
+    """Day 1 part 1 resolution."""
+    return sum(compute_line(line, False) for line in lines)
 
 
-if __name__ == '__main__':
-    __main__()
+def part2(lines):
+    """Day 1 part 2 resolution."""
+    return sum(compute_line(line, True) for line in lines)
