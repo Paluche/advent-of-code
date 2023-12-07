@@ -3,3 +3,4 @@ Day 1 - part 2: 54845
 Day 2 - part 1: 2256
 Day 2 - part 2: 74229
 Day 3 - part 1: 533775
+Day 3 - part 2: 78236071

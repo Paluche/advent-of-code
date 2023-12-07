@@ -1,5 +1,6 @@
-// for each line. Find the numbers and start and stop coordinates. Find the
+// For each line; find the numbers and start and stop coordinates; find the
 // symbols and their coordinates.
+// For part 2, we must concentrate on only the * symbols.
 
 struct Number {
     value: usize,
@@ -57,8 +58,38 @@ impl Number {
 }
 
 struct Symbol {
+    pub value: char,
     pub line: usize,
     pub column: usize,
+}
+
+impl Symbol {
+    fn get_adjacent_numbers<'a>(
+        &'a self,
+        numbers: &'a [Number],
+        line_numbers: usize,
+        column_numbers: usize,
+    ) -> Vec<&Number> {
+        let mut ret: Vec<&Number> = Vec::new();
+        let min_line = self.line.checked_sub(1).unwrap_or(self.line);
+        let max_line = std::cmp::min(self.line + 1, line_numbers);
+        let min_column = self.column.checked_sub(1).unwrap_or(self.column);
+        let max_column = std::cmp::min(self.column + 1, column_numbers);
+
+        for number in numbers {
+            if !(min_line <= number.line && number.line <= max_line) {
+                continue;
+            }
+
+            if !(min_column <= number.end && number.start <= max_column) {
+                continue;
+            }
+
+            ret.push(number)
+        }
+
+        ret
+    }
 }
 
 fn parse_lines(input: &str) -> (Vec<Symbol>, Vec<Number>, usize, usize) {
@@ -83,6 +114,7 @@ fn parse_lines(input: &str) -> (Vec<Symbol>, Vec<Number>, usize, usize) {
 
                 if c != '.' {
                     symbols.push(Symbol {
+                        value: c,
                         line: line_number,
                         column: column_number,
                     });
@@ -93,6 +125,7 @@ fn parse_lines(input: &str) -> (Vec<Symbol>, Vec<Number>, usize, usize) {
 
     (symbols, numbers, line_numbers, column_numbers.unwrap())
 }
+
 #[aoc(day3, part1)]
 fn part1(input: &str) -> usize {
     let (symbols, numbers, line_numbers, column_numbers) = parse_lines(input);
@@ -101,4 +134,25 @@ fn part1(input: &str) -> usize {
         .iter()
         .filter_map(|n: &Number| n.has_adjacent_symbol(&symbols, line_numbers, column_numbers))
         .sum()
+}
+
+#[aoc(day3, part2)]
+fn part2(input: &str) -> usize {
+    let (symbols, numbers, line_numbers, column_numbers) = parse_lines(input);
+
+    let gear_symbols: Vec<&Symbol> = symbols.iter().filter(|s| s.value == '*').collect();
+
+    let mut gear_ratios: Vec<usize> = Vec::new();
+
+    for symbol in gear_symbols {
+        let adjacent = symbol.get_adjacent_numbers(&numbers, line_numbers, column_numbers);
+
+        if adjacent.len() != 2 {
+            continue;
+        }
+
+        gear_ratios.push(adjacent.iter().map(|n| n.value).product());
+    }
+
+    gear_ratios.iter().sum()
 }
