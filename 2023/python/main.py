@@ -43,26 +43,20 @@ def load_days():
             if not file_name.startswith('day'):
                 continue
 
-            day_number = int(file_name[len('day'):-len('.py')], base=10)
+            day_number = int(file_name[len('day'):-len('.py')])
 
             module = import_module(f'solutions.day{day_number}')
 
-            ret[day_number] = ((get_part(module, 1),
-                               get_part(module, 2)),
-                               get_input(day_number))
+            ret[day_number] = (
+                (
+                    get_part(module, 1),
+                    get_part(module, 2)
+                ),
+                get_input(day_number)
+            )
         break
 
     return ret
-
-
-def day_number_type(arg):
-    """Check the provided argument for a day number is valid."""
-    value = int(arg)
-
-    if not 1 <= value <= 31:
-        raise ValueError()
-
-    return value
 
 
 def __main__():
@@ -70,10 +64,14 @@ def __main__():
 
     parser.add_argument('-d',
                         '--day',
-                        type=day_number_type,
-                        help='Run a specific day (between 1 and 31 included')
+                        dest='day',
+                        type=int,
+                        help='Run a specific day (between 1 and 24 included)',
+                        choices=range(25))
+
     parser.add_argument('-p',
                         '--part',
+                        dest='part',
                         type=int,
                         help='Run a specific part',
                         choices=[1, 2])
@@ -86,6 +84,9 @@ def __main__():
             continue
 
         for j, part in enumerate(parts):
+            if part is None:
+                continue
+
             if args.part and not j == args.part:
                 continue
 
