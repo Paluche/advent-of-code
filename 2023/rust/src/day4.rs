@@ -1,25 +1,14 @@
+use crate::utils;
 // Card   <id>: 10 numbers, each 2 digits | x (25) numbers 2 digits each.
 // Number could start with a space as first digit meaning 0.
-
-fn parse_numbers(s: &str) -> Vec<u8> {
-    let mut ret: Vec<u8> = Vec::new();
-
-    for number in s.split(' ') {
-        if let Ok(number) = number.parse::<u8>() {
-            ret.push(number)
-        }
-    }
-
-    ret
-}
 
 // Returns the number of winning numbers.
 fn parse_card(line: &str) -> usize {
     let (_card_id, results) = line.split_once(':').unwrap();
     let (winning, selected) = results.split_once('|').unwrap();
 
-    let winning = parse_numbers(winning);
-    parse_numbers(selected)
+    let winning = utils::parse_numbers::<u8>(winning);
+    utils::parse_numbers(selected)
         .iter()
         .filter(|n| winning.contains(n))
         .count()
