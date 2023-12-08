@@ -38,3 +38,23 @@ fn part1_res(line: &str) -> usize {
 fn part1(input: &str) -> usize {
     input.lines().map(part1_res).sum()
 }
+
+#[aoc(day4, part2)]
+fn part2(input: &str) -> usize {
+    let cards_results = input.lines().map(parse_card);
+    let mut cards_copies = vec![1; input.lines().count()];
+
+    for (i, result) in cards_results.enumerate() {
+        let cur_copies = cards_copies[i];
+
+        for j in i + 1..i + 1 + result {
+            if j >= cards_copies.len() {
+                break;
+            }
+
+            cards_copies[j] += cur_copies;
+        }
+    }
+
+    cards_copies.iter().sum()
+}
