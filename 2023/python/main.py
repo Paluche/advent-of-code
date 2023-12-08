@@ -4,6 +4,7 @@
 Defaults runs all the days and part."""
 
 import os
+import time
 from argparse import ArgumentParser
 from importlib import import_module
 
@@ -75,7 +76,12 @@ def __main__():
                         type=int,
                         help='Run a specific part',
                         choices=[1, 2])
-    # TODO -t, --timing         Show timing information
+
+    parser.add_argument('-t',
+                        '--timing',
+                        dest='timing',
+                        action='store_true',
+                        help='Show execution time of the solution.')
 
     args = parser.parse_args()
 
@@ -90,7 +96,26 @@ def __main__():
             if args.part and not j == args.part:
                 continue
 
-            print(f'Day {i}, part {j}: {part(lines)}')
+            start = time.monotonic_ns()
+            res = part(lines)
+            stop = time.monotonic_ns()
+
+            if args.timing:
+                ns = stop - start
+                us = ns // 1000
+                ms = us // 1000
+                s = ms // 1000
+
+                ns %= 1000
+                us %= 1000
+                ms %= 1000
+                s %= 1000
+
+                timing = f'({s}s {ms}ms {us}us {ns}ns)'
+            else:
+                timing = ''
+
+            print(f'Day {i}, part {j}: {res} {timing}')
 
 
 if __name__ == '__main__':
