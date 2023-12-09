@@ -9,14 +9,24 @@ fn parse_input(input: &str) -> Vec<(usize, usize)> {
     std::iter::zip(times, distances).collect()
 }
 
-fn find_winning_values(time: usize, distance: usize) -> Vec<usize> {
-    (0..time).filter(|x| ((time - x) * x) > distance).collect()
+fn run(input: &str) -> usize {
+    parse_input(input)
+        .iter()
+        .map(|(t, d)| {
+            (0..*t)
+                .filter(|x| ((*t - x) * x) > *d)
+                .collect::<Vec<usize>>()
+                .len()
+        })
+        .product()
 }
 
 #[aoc(day6, part1)]
 fn part1(input: &str) -> usize {
-    parse_input(input)
-        .iter()
-        .map(|(t, d)| find_winning_values(*t, *d).len())
-        .product()
+    run(input)
+}
+
+#[aoc(day6, part2)]
+fn part2(input: &str) -> usize {
+    run(&input.replace(' ', ""))
 }
