@@ -7,5 +7,6 @@ Day 3 - part 2: 78236071
 Day 4 - part 1: 22674
 Day 4 - part 2: 5747443
 Day 5 - part 1: 177942185
+Day 6 - part 1: 345015
 Day 9 - part 1: 2174807968
 Day 9 - part 2: 1208
