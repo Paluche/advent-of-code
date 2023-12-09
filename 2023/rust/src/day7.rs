@@ -1,16 +1,21 @@
 use std::cmp::Ordering;
 use std::iter::zip;
 
-const CARDS: [char; 13] = [
-    '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
-];
-
 type Card = u8;
 type EvalHandItem = (u8, u8);
 type Bid = usize;
 type EvalHand = Vec<EvalHandItem>;
 type Cards = Vec<Card>;
 type Hand = (Cards, EvalHand, Bid);
+type CardOrder = [char; 13];
+
+const CARD_ORDER_1: CardOrder = [
+    '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
+];
+
+const CARD_ORDER_2: CardOrder = [
+    'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A',
+];
 
 fn compare_hand_items(a: &EvalHandItem, b: &EvalHandItem) -> Ordering {
     let (ac, an) = a;
@@ -24,33 +29,54 @@ fn compare_hand_items(a: &EvalHandItem, b: &EvalHandItem) -> Ordering {
     bc.cmp(ac)
 }
 
-// Returns the different cards in the hand and the number of time they have been encountered.
-fn parse_line(line: &str) -> Hand {
-    let (cards, bid) = line.split_once(' ').unwrap();
+fn find_joker(eval_hand: &EvalHand) -> Option<(usize, u8)> {
+    for (i, (c, n)) in eval_hand.iter().enumerate() {
+        if *c == 0 {
+            return Some((i, *n));
+        }
+    }
 
-    let mut hand: EvalHand = CARDS
+    None
+}
+
+// Returns the different cards in the hand and the number of time they have been encountered.
+fn parse_line(line: &str, j_as_joker: bool) -> Hand {
+    let (cards, bid) = line.split_once(' ').unwrap();
+    let card_order = if j_as_joker {
+        CARD_ORDER_2
+    } else {
+        CARD_ORDER_1
+    };
+
+    let mut eval_hand: EvalHand = card_order
         .iter()
         .map(|c| {
             (
-                CARDS.iter().position(|x| x == c).unwrap() as Card,
+                card_order.iter().position(|x| x == c).unwrap() as Card,
                 cards.matches(&c.to_string()).count() as u8,
             )
         })
         .filter(|(_, x)| *x != 0)
         .collect();
 
-    hand.sort_by(compare_hand_items);
+    eval_hand.sort_by(compare_hand_items);
+
+    if j_as_joker {
+        if let Some((i, n)) = find_joker(&eval_hand) {
+            if n != 5 {
+                // Other all the cards were jokers, there was no optimization to do.
+                eval_hand.remove(i);
+                eval_hand[0].1 += n;
+            }
+        }
+    }
 
     let cards = cards
         .chars()
-        .map(|c| CARDS.iter().position(|x| *x == c).unwrap() as u8)
+        .map(|c| card_order.iter().position(|x| *x == c).unwrap() as u8)
         .collect();
 
-    (cards, hand, bid.parse::<Bid>().unwrap())
-}
-
-fn load_input(input: &str) -> Vec<Hand> {
-    input.lines().map(parse_line).collect()
+    (cards, eval_hand, bid.parse::<Bid>().unwrap())
 }
 
 fn compare_hands(h1: &Hand, h2: &Hand) -> Ordering {
@@ -97,16 +123,25 @@ fn compare_hands(h1: &Hand, h2: &Hand) -> Ordering {
     Ordering::Equal
 }
 
-#[aoc(day7, part1)]
-fn part1(input: &str) -> usize {
-    let mut games = load_input(input);
+fn run(input: &str, j_as_joker: bool) -> usize {
+    let mut hands: Vec<Hand> = input.lines().map(|l| parse_line(l, j_as_joker)).collect();
 
-    games.sort_by(compare_hands);
+    hands.sort_by(compare_hands);
 
-    games
+    hands
         .iter()
         .map(|(_, _, b)| b)
         .enumerate()
         .map(|(a, b)| (a + 1) * b)
         .sum()
+}
+
+#[aoc(day7, part1)]
+fn part1(input: &str) -> usize {
+    run(input, false)
+}
+
+#[aoc(day7, part2)]
+fn part2(input: &str) -> usize {
+    run(input, true)
 }
