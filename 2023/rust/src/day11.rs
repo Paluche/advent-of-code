@@ -83,3 +83,8 @@ fn dist(a: &(usize, usize), b: &(usize, usize)) -> usize {
 fn part1(input: &str) -> usize {
     run(input, 2)
 }
+
+#[aoc(day11, part2)]
+fn part2(input: &str) -> usize {
+    run(input, 1000000)
+}
