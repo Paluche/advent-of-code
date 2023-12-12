@@ -105,7 +105,8 @@ fn parse_lines(input: &str) -> (Vec<Symbol>, Vec<Number>, usize, usize) {
 
         for (column_number, c) in line.chars().enumerate() {
             if c.is_ascii_digit() {
-                let cur = current_number.get_or_insert(Number::new(line_number, column_number));
+                let cur = current_number
+                    .get_or_insert(Number::new(line_number, column_number));
                 cur.next_digit(c)
             } else {
                 if let Some(cur) = current_number.take() {
@@ -132,7 +133,9 @@ fn part1(input: &str) -> usize {
 
     numbers
         .iter()
-        .filter_map(|n: &Number| n.has_adjacent_symbol(&symbols, line_numbers, column_numbers))
+        .filter_map(|n: &Number| {
+            n.has_adjacent_symbol(&symbols, line_numbers, column_numbers)
+        })
         .sum()
 }
 
@@ -140,12 +143,14 @@ fn part1(input: &str) -> usize {
 fn part2(input: &str) -> usize {
     let (symbols, numbers, line_numbers, column_numbers) = parse_lines(input);
 
-    let gear_symbols: Vec<&Symbol> = symbols.iter().filter(|s| s.value == '*').collect();
+    let gear_symbols: Vec<&Symbol> =
+        symbols.iter().filter(|s| s.value == '*').collect();
 
     let mut gear_ratios: Vec<usize> = Vec::new();
 
     for symbol in gear_symbols {
-        let adjacent = symbol.get_adjacent_numbers(&numbers, line_numbers, column_numbers);
+        let adjacent =
+            symbol.get_adjacent_numbers(&numbers, line_numbers, column_numbers);
 
         if adjacent.len() != 2 {
             continue;

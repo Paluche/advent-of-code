@@ -171,7 +171,8 @@ fn part1(input: &str) -> usize {
 #[aoc(day5, part2)]
 fn part2(input: &str) -> usize {
     let (seeds, maps) = load_input(input);
-    let mut ranges: Vec<Range> = seeds.chunks_exact(2).map(|x| (x[0], x[1])).collect();
+    let mut ranges: Vec<Range> =
+        seeds.chunks_exact(2).map(|x| (x[0], x[1])).collect();
 
     for map_rules in maps.iter() {
         ranges = ranges

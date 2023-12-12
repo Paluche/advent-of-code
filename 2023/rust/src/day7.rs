@@ -124,7 +124,8 @@ fn compare_hands(h1: &Hand, h2: &Hand) -> Ordering {
 }
 
 fn run(input: &str, j_as_joker: bool) -> usize {
-    let mut hands: Vec<Hand> = input.lines().map(|l| parse_line(l, j_as_joker)).collect();
+    let mut hands: Vec<Hand> =
+        input.lines().map(|l| parse_line(l, j_as_joker)).collect();
 
     hands.sort_by(compare_hands);
 

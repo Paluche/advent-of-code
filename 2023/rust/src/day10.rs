@@ -36,33 +36,57 @@ fn next_direction(prev: &Direction, c: &char) -> Option<(Direction, Vector)> {
     if false {
         match c {
             '|' => match prev {
-                Direction::Up => Some((Direction::Up, /* ↑ → */ (0, 1))),
-                Direction::Down => Some((Direction::Down, /* ↓ ← */ (0, -1))),
+                Direction::Up => {
+                    Some((Direction::Up, /* ↑ → */ (0, 1)))
+                }
+                Direction::Down => {
+                    Some((Direction::Down, /* ↓ ← */ (0, -1)))
+                }
                 _ => None,
             },
             '-' => match prev {
-                Direction::Right => Some((Direction::Right, /* → ↓ */ (1, 0))),
-                Direction::Left => Some((Direction::Left, /* ← ↑ */ (-1, 0))),
+                Direction::Right => {
+                    Some((Direction::Right, /* → ↓ */ (1, 0)))
+                }
+                Direction::Left => {
+                    Some((Direction::Left, /* ← ↑ */ (-1, 0)))
+                }
                 _ => None,
             },
             'L' => match prev {
-                Direction::Left => Some((Direction::Up, /*   ↗ */ (-1, 1))),
-                Direction::Down => Some((Direction::Right, /* ↳ ↙ */ (1, -1))),
+                Direction::Left => {
+                    Some((Direction::Up, /*   ↗ */ (-1, 1)))
+                }
+                Direction::Down => {
+                    Some((Direction::Right, /* ↳ ↙ */ (1, -1)))
+                }
                 _ => None,
             },
             'J' => match prev {
-                Direction::Right => Some((Direction::Up, /* ↲ ↘ */ (1, 1))),
-                Direction::Down => Some((Direction::Left, /*   ↖ */ (-1, -1))),
+                Direction::Right => {
+                    Some((Direction::Up, /* ↲ ↘ */ (1, 1)))
+                }
+                Direction::Down => {
+                    Some((Direction::Left, /*   ↖ */ (-1, -1)))
+                }
                 _ => None,
             },
             '7' => match prev {
-                Direction::Up => Some((Direction::Left, /* ↰ ↗ */ (1, -1))),
-                Direction::Right => Some((Direction::Down, /* ↴ ↙ */ (-1, 1))),
+                Direction::Up => {
+                    Some((Direction::Left, /* ↰ ↗ */ (1, -1)))
+                }
+                Direction::Right => {
+                    Some((Direction::Down, /* ↴ ↙ */ (-1, 1)))
+                }
                 _ => None,
             },
             'F' => match prev {
-                Direction::Up => Some((Direction::Right, /* ↱ ↘ */ (1, 1))),
-                Direction::Left => Some((Direction::Down, /*   ↖ */ (-1, -1))),
+                Direction::Up => {
+                    Some((Direction::Right, /* ↱ ↘ */ (1, 1)))
+                }
+                Direction::Left => {
+                    Some((Direction::Down, /*   ↖ */ (-1, -1)))
+                }
                 _ => None,
             },
             '.' => None,
@@ -71,33 +95,57 @@ fn next_direction(prev: &Direction, c: &char) -> Option<(Direction, Vector)> {
     } else {
         match c {
             '|' => match prev {
-                Direction::Up => Some((Direction::Up, /* ↑ ← */ (0, -1))),
-                Direction::Down => Some((Direction::Down, /* ↓ → */ (0, 1))),
+                Direction::Up => {
+                    Some((Direction::Up, /* ↑ ← */ (0, -1)))
+                }
+                Direction::Down => {
+                    Some((Direction::Down, /* ↓ → */ (0, 1)))
+                }
                 _ => None,
             },
             '-' => match prev {
-                Direction::Right => Some((Direction::Right, /* → ↑ */ (-1, 0))),
-                Direction::Left => Some((Direction::Left, /* ← ↓ */ (1, 0))),
+                Direction::Right => {
+                    Some((Direction::Right, /* → ↑ */ (-1, 0)))
+                }
+                Direction::Left => {
+                    Some((Direction::Left, /* ← ↓ */ (1, 0)))
+                }
                 _ => None,
             },
             'L' => match prev {
-                Direction::Left => Some((Direction::Up, /*   ↙ */ (1, -1))),
-                Direction::Down => Some((Direction::Right, /* ↳ ↗ */ (-1, 1))),
+                Direction::Left => {
+                    Some((Direction::Up, /*   ↙ */ (1, -1)))
+                }
+                Direction::Down => {
+                    Some((Direction::Right, /* ↳ ↗ */ (-1, 1)))
+                }
                 _ => None,
             },
             'J' => match prev {
-                Direction::Right => Some((Direction::Up, /* ↲ ↖ */ (-1, -1))),
-                Direction::Down => Some((Direction::Left, /*   ↘ */ (1, 1))),
+                Direction::Right => {
+                    Some((Direction::Up, /* ↲ ↖ */ (-1, -1)))
+                }
+                Direction::Down => {
+                    Some((Direction::Left, /*   ↘ */ (1, 1)))
+                }
                 _ => None,
             },
             '7' => match prev {
-                Direction::Up => Some((Direction::Left, /* ↰ ↙ */ (1, -1))),
-                Direction::Right => Some((Direction::Down, /* ↴ ↗ */ (-1, 1))),
+                Direction::Up => {
+                    Some((Direction::Left, /* ↰ ↙ */ (1, -1)))
+                }
+                Direction::Right => {
+                    Some((Direction::Down, /* ↴ ↗ */ (-1, 1)))
+                }
                 _ => None,
             },
             'F' => match prev {
-                Direction::Up => Some((Direction::Right, /* ↱ ↖ */ (-1, -1))),
-                Direction::Left => Some((Direction::Down, /*   ↘ */ (1, 1))),
+                Direction::Up => {
+                    Some((Direction::Right, /* ↱ ↖ */ (-1, -1)))
+                }
+                Direction::Left => {
+                    Some((Direction::Down, /*   ↘ */ (1, 1)))
+                }
                 _ => None,
             },
             '.' => None,
@@ -117,7 +165,10 @@ fn next_position(start: Point, direction: Direction) -> Option<Point> {
     }
 }
 
-fn get_loop(matrix: &Matrix<char>, start: Point) -> Option<Vec<(Point, Vector)>> {
+fn get_loop(
+    matrix: &Matrix<char>,
+    start: Point,
+) -> Option<Vec<(Point, Vector)>> {
     [
         Direction::Up,
         Direction::Left,
@@ -156,7 +207,15 @@ fn get_area(pipe: &[(Point, Vector)]) -> Vec<Point> {
     for row in rows {
         let mut column_limits: Vec<(usize, i8)> = pipe
             .iter()
-            .filter_map(|((pr, pc), (_, vc))| if pr == row { Some((*pc, *vc)) } else { None })
+            .filter_map(
+                |((pr, pc), (_, vc))| {
+                    if pr == row {
+                        Some((*pc, *vc))
+                    } else {
+                        None
+                    }
+                },
+            )
             .collect();
         column_limits.sort_by(|(pca, _), (pcb, _)| pca.cmp(pcb));
 
@@ -195,7 +254,8 @@ fn part2(input: &str) -> usize {
     let area: Vec<Point> = get_area(&pipe);
 
     if false {
-        let mut debug: Matrix<char> = Matrix::from_fn(matrix.rows, matrix.columns, |_| ' ');
+        let mut debug: Matrix<char> =
+            Matrix::from_fn(matrix.rows, matrix.columns, |_| ' ');
 
         // Mark area
         for cur in area.iter() {

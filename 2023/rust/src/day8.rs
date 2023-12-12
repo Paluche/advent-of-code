@@ -23,7 +23,8 @@ fn load_input(input: &str) -> (Directions, Nodes) {
     // Drop empty line.
     lines.next();
 
-    let mut nodes: Nodes = lines.map(|l| (&l[0..3], [&l[7..10], &l[12..15]])).collect();
+    let mut nodes: Nodes =
+        lines.map(|l| (&l[0..3], [&l[7..10], &l[12..15]])).collect();
 
     nodes.sort_by_key(|(l, _)| *l);
 
@@ -42,7 +43,12 @@ fn next_location<'a>(
     nodes[node_index].1[direction as usize]
 }
 
-fn follow<F>(directions: &Directions, nodes: &Nodes, start: Location, f: F) -> usize
+fn follow<F>(
+    directions: &Directions,
+    nodes: &Nodes,
+    start: Location,
+    f: F,
+) -> usize
 where
     F: Fn(Location) -> bool,
 {

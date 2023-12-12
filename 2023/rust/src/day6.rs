@@ -3,8 +3,11 @@ use crate::utils;
 fn parse_input(input: &str) -> Vec<(usize, usize)> {
     let mut lines = input.lines();
 
-    let times = utils::parse_numbers::<usize>(&lines.next().unwrap()["Time:".len()..]);
-    let distances = utils::parse_numbers::<usize>(&lines.next().unwrap()["Distance:".len()..]);
+    let times =
+        utils::parse_numbers::<usize>(&lines.next().unwrap()["Time:".len()..]);
+    let distances = utils::parse_numbers::<usize>(
+        &lines.next().unwrap()["Distance:".len()..],
+    );
 
     std::iter::zip(times, distances).collect()
 }
