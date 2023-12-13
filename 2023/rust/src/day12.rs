@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Spring {
     Damaged,
     Operational,
@@ -15,9 +18,9 @@ impl Spring {
     }
 }
 
-fn parse_input(input: &str) -> Vec<(Vec<Spring>, Vec<u8>)> {
-    input
-        .lines()
+fn run(lines: &[String]) -> usize {
+    lines
+        .iter()
         .map(|l| {
             let (springs, d_springs) = l.split_once(' ').unwrap();
 
@@ -29,20 +32,27 @@ fn parse_input(input: &str) -> Vec<(Vec<Spring>, Vec<u8>)> {
                     .collect(),
             )
         })
-        .collect()
+        .map(|r| compute_arrangements(&r))
+        .sum()
 }
 
 fn compute_arrangements(
     (springs, d_springs): &(Vec<Spring>, Vec<u8>),
 ) -> usize {
-    evaluate_row(springs, d_springs, None)
+    let mut cache = HashMap::<(&[Spring], &[u8], Option<u8>), usize>::new();
+    evaluate_row(springs, d_springs, None, &mut cache)
 }
 
-fn evaluate_row(
-    springs: &[Spring],
-    d_springs: &[u8],
+fn evaluate_row<'a, 'b>(
+    springs: &'a [Spring],
+    d_springs: &'b [u8],
     remaining_d: Option<u8>,
+    cache: &mut HashMap<(&'a [Spring], &'b [u8], Option<u8>), usize>,
 ) -> usize {
+    if let Some(ret) = cache.get(&(springs, d_springs, remaining_d)) {
+        return *ret;
+    }
+
     let mut i: usize = 0;
     let mut remaining_d: Option<u8> = remaining_d;
     // None => Spring can be either damaged or operational
@@ -103,7 +113,13 @@ fn evaluate_row(
                     let op_res = evaluate_row(
                         &springs[j + 1..],
                         &d_springs[i..],
-                        None
+                        None,
+                        cache,
+                    );
+
+                    cache.insert(
+                        (&springs[j + 1..], &d_springs[i..], None),
+                        op_res,
                     );
 
                     // Damaged spring
@@ -121,6 +137,12 @@ fn evaluate_row(
                         &springs[j + 1..],
                         &d_springs[i..],
                         remaining_d,
+                        cache,
+                    );
+
+                    cache.insert(
+                        (&springs[j + 1..], &d_springs[i..], remaining_d),
+                        damages_res,
                     );
 
                     return op_res + damages_res;
@@ -130,8 +152,7 @@ fn evaluate_row(
     }
 
     // Check all the damage groups has been consumed.
-    if (remaining_d == None || remaining_d == Some(0)) && i == d_springs.len()
-    {
+    if (remaining_d == None || remaining_d == Some(0)) && i == d_springs.len() {
         return 1;
     }
 
@@ -140,8 +161,19 @@ fn evaluate_row(
 
 #[aoc(day12, part1)]
 fn part1(input: &str) -> usize {
-    parse_input(input)
-        .iter()
-        .map(|r| compute_arrangements(r))
-        .sum()
+    run(&input
+        .lines()
+        .map(|x| String::from(x))
+        .collect::<Vec<String>>())
+}
+
+#[aoc(day12, part2)]
+fn part2(input: &str) -> usize {
+    run(&input
+        .lines()
+        .map(|l| {
+            let (s, c) = l.split_once(' ').unwrap();
+            format!("{s}?{s}?{s}?{s}?{s} {c},{c},{c},{c},{c}")
+        })
+        .collect::<Vec<String>>())
 }
