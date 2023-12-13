@@ -23,3 +23,4 @@ Day 11 - part 2: 731244261352
 Day 12 - part 1: 7173
 Day 12 - part 2: 29826669191291
 Day 13 - part 1: 34993
+Day 13 - part 2: 29341

@@ -1,33 +1,48 @@
 use pathfinding::matrix::Matrix;
 
-fn search_row_mirror(matrix: &Matrix<char>) -> usize {
+
+fn search_row_mirror(matrix: &Matrix<char>, smudge_count:u8) -> usize {
     'a: for i in 1..matrix.rows {
         let width = i.min(matrix.rows - i);
+        let mut smudge = 0;
+
         for r in 0..width {
             for c in 0..matrix.columns {
                 if matrix.get((i - 1 - r, c)).unwrap() != matrix.get((i + r, c)).unwrap() {
-                    continue 'a;
+                    smudge += 1;
+                    if smudge > smudge_count {
+                        continue 'a;
+                    }
                 }
             }
         }
 
-        return i;
+        if smudge == smudge_count {
+            return i;
+        }
     }
     0
 }
 
-fn search_col_mirror(matrix: &Matrix<char>) -> usize {
+fn search_col_mirror(matrix: &Matrix<char>, smudge_count:u8) -> usize {
     'a: for i in 1..matrix.columns {
         let width = i.min(matrix.columns - i);
+        let mut smudge = 0;
+
         for c in 0..width {
             for r in 0..matrix.rows {
                 if matrix.get((r, i - 1 - c)).unwrap() != matrix.get((r, i + c)).unwrap() {
-                    continue 'a;
+                    smudge += 1;
+                    if smudge > smudge_count {
+                        continue 'a;
+                    }
                 }
             }
         }
 
-        return i;
+        if smudge == smudge_count {
+            return i;
+        }
     }
     0
 }
@@ -44,10 +59,19 @@ fn parse_input(input: &str) -> Vec<Matrix<char>> {
         .collect()
 }
 
-#[aoc(day13, part1)]
-fn part1(input: &str) -> usize {
+fn run(input:&str, smudge_count:u8) ->usize {
     parse_input(input)
         .iter()
-        .map(|m| search_col_mirror(m) + 100 * search_row_mirror(m))
+        .map(|m| search_col_mirror(m, smudge_count) + 100 * search_row_mirror(m, smudge_count))
         .sum()
+}
+
+#[aoc(day13, part1)]
+fn part1(input: &str) -> usize {
+    run(input, 0)
+}
+
+#[aoc(day13, part2)]
+fn part2(input: &str) -> usize {
+    run(input, 1)
 }
