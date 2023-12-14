@@ -13,10 +13,13 @@ pub fn parse_numbers<T: std::str::FromStr>(s: &str) -> Vec<T> {
 }
 
 pub fn print_matrix(matrix: &Matrix<char>) {
+    println!("{}x{}", matrix.rows, matrix.columns);
+
     for row in matrix {
         for c in row {
             print!("{c}");
         }
         println!();
     }
+    println!();
 }
