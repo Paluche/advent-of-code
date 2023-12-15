@@ -1,50 +1,34 @@
 fn hash_algorithm(s: &str) -> usize {
-    let mut ret: usize = 0;
-
-    for c in s.chars() {
-        if c == '\n' {
-            continue;
-        }
-
-        ret += c as usize;
-        ret *= 17;
-        ret %= 256;
-    }
-    ret
+    s.chars().fold(0usize, |a, c| ((a + c as usize) * 17) % 256)
 }
 
 #[aoc(day15, part1)]
 fn part1(input: &str) -> usize {
-    input.split(',').map(hash_algorithm).sum()
+    input.split(',').map(|s| hash_algorithm(s.trim_end())).sum()
+}
+
+fn load(s:&str) -> (&str, usize, Option<usize>) {
+    let (label, focal) = if s.chars().last().unwrap() == '-' {
+        (&s[..s.len() - 1], None)
+    } else {
+        let (label, focal) = s.split_once('=').unwrap();
+        (label, Some(focal.parse::<usize>().unwrap()))
+    };
+
+    (label, hash_algorithm(label), focal)
 }
 
 fn parse_entry<'a>(s: &'a str, boxes: &mut Vec<Vec<(&'a str, usize)>>) {
-    let s = s.trim_end();
+    let (label, id, focal) = load(s.trim_end());
 
-    if s == "" {
-        return;
-    }
-
-    if s.chars().last().unwrap() == '-' {
-        let label = &s[..s.len() - 1];
-        let id = hash_algorithm(label);
-
-        if let Some(position) = boxes[id].iter().position(|(l, _)| *l == label)
-        {
-            boxes[id].remove(position);
-        }
-    } else {
-        let (label, focal) = s.split_once('=').unwrap();
-        let id = hash_algorithm(label);
-        let focal = focal.parse::<usize>().unwrap();
-
-        if let Some(position) = boxes[id].iter().position(|(l, _)| *l == label)
-        {
-            boxes[id].remove(position);
+    if let Some(position) = boxes[id].iter().position(|(l, _)| *l == label)
+    {
+        boxes[id].remove(position);
+        if let Some(focal) = focal {
             boxes[id].insert(position, (label, focal));
-        } else {
-            boxes[id].push((label, focal));
         }
+    } else if let Some(focal) = focal {
+        boxes[id].push((label, focal));
     }
 }
 
