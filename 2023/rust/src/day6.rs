@@ -1,23 +1,14 @@
-use crate::utils;
-
-fn parse_input(input: &str) -> Vec<(usize, usize)> {
-    let mut lines = input.lines();
-
-    let times =
-        utils::parse_numbers::<usize>(&lines.next().unwrap()["Time:".len()..]);
-    let distances = utils::parse_numbers::<usize>(
-        &lines.next().unwrap()["Distance:".len()..],
-    );
-
-    std::iter::zip(times, distances).collect()
-}
+use crate::utils::parse_numbers;
 
 fn run(input: &str) -> usize {
-    parse_input(input)
+    let mut lines = input.lines();
+
+    parse_numbers::<usize>(&lines.next().unwrap()["Time:".len()..])
         .iter()
+        .zip(parse_numbers::<usize>(&lines.next().unwrap()["Distance:".len()..]))
         .map(|(t, d)| {
             (0..*t)
-                .filter(|x| ((*t - x) * x) > *d)
+                .filter(|x| ((*t - x) * x) > d)
                 .collect::<Vec<usize>>()
                 .len()
         })
