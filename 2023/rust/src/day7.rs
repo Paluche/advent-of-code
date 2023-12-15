@@ -18,15 +18,13 @@ const CARD_ORDER_2: CardOrder = [
 ];
 
 fn compare_hand_items(a: &EvalHandItem, b: &EvalHandItem) -> Ordering {
-    let (ac, an) = a;
-    let (bc, bn) = b;
-    let number_ord = bn.cmp(an);
+    let number_ord = b.1.cmp(&a.1);
 
     if number_ord != Ordering::Equal {
         return number_ord;
     }
 
-    bc.cmp(ac)
+    b.0.cmp(&a.0)
 }
 
 fn find_joker(eval_hand: &EvalHand) -> Option<(usize, u8)> {
@@ -39,7 +37,8 @@ fn find_joker(eval_hand: &EvalHand) -> Option<(usize, u8)> {
     None
 }
 
-// Returns the different cards in the hand and the number of time they have been encountered.
+// Returns the different cards in the hand and the number of time they have
+// been encountered.
 fn parse_line(line: &str, j_as_joker: bool) -> Hand {
     let (cards, bid) = line.split_once(' ').unwrap();
     let card_order = if j_as_joker {
@@ -64,7 +63,8 @@ fn parse_line(line: &str, j_as_joker: bool) -> Hand {
     if j_as_joker {
         if let Some((i, n)) = find_joker(&eval_hand) {
             if n != 5 {
-                // Other all the cards were jokers, there was no optimization to do.
+                // Otherwise if all the cards are jokers, that means there is
+                // no optimization to do.
                 eval_hand.remove(i);
                 eval_hand[0].1 += n;
             }
@@ -83,7 +83,8 @@ fn compare_hands(h1: &Hand, h2: &Hand) -> Ordering {
     let (c1, eh1, _) = h1;
     let (c2, eh2, _) = h2;
 
-    // The lesser there is different cards in the hand, the highest the value of the hand is.
+    // The lesser there is different cards in the hand, the highest the value
+    // of the hand is.
     // Five of a kind  5         -> 1
     // Four of a kind  4 1       -> 2
     // Full house      3 2       -> 2
@@ -109,8 +110,9 @@ fn compare_hands(h1: &Hand, h2: &Hand) -> Ordering {
         }
     }
 
-    // Compare the equals, we are comparing two hands of the same type. Search for the highest card
-    // by the card type, starting from the first card in the hand.
+    // Compare the equals, we are comparing two hands of the same type. Search
+    // for the highest card by the card type, starting from the first card in
+    // the hand.
     for (card1, card2) in zip(c1, c2) {
         let ord = card1.cmp(card2);
 
