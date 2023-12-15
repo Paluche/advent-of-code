@@ -26,6 +26,7 @@ fn get_digits_1(line: &str) -> Vec<u32> {
 
     ret
 }
+
 fn get_digits_2(line: &str) -> Vec<u32> {
     let mut ret: Vec<u32> = Vec::new();
 
@@ -52,6 +53,7 @@ fn part1(input: &str) -> usize {
 
     total as usize
 }
+
 #[aoc(day1, part2)]
 fn part2(input: &str) -> usize {
     let mut ret: Vec<u32> = Vec::new();
