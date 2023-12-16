@@ -1,19 +1,23 @@
 use pathfinding::matrix::Matrix;
 
+type Position = (usize, usize);
+type Direction = (isize, isize);
+
 fn parse_input(input: &str) -> Matrix<char> {
-    Matrix::from_rows(input.lines().take_while(|x| *x != "").map(|l| l.chars()))
-        .unwrap()
+    Matrix::from_rows(
+        input
+            .lines()
+            .take_while(|x| !x.is_empty())
+            .map(|l| l.chars()),
+    )
+    .unwrap()
 }
 
-fn go(
-    matrix: &Matrix<char>,
-    start: (usize, usize),
-    direction: (isize, isize),
-) -> usize {
+fn go(matrix: &Matrix<char>, start: Position, direction: Direction) -> usize {
     let mut energized = Matrix::from_fn(matrix.rows, matrix.columns, |_| 0);
-    let mut cache: Vec<((usize, usize), (isize, isize))> = Vec::new();
+    let mut cache: Vec<(Position, Direction)> = Vec::new();
 
-    be_a_beam(&mut energized, &matrix, &mut cache, start, direction);
+    be_a_beam(&mut energized, matrix, &mut cache, start, direction);
 
     energized
         .iter()
@@ -24,10 +28,10 @@ fn go(
 fn be_a_beam(
     energized: &mut Matrix<u8>,
     matrix: &Matrix<char>,
-    cache: &mut Vec<((usize, usize), (isize, isize))>,
-    start: (usize, usize),
-    direction: (isize, isize),
-) -> () {
+    cache: &mut Vec<(Position, Direction)>,
+    start: Position,
+    direction: Direction,
+) {
     if cache.contains(&(start, direction)) {
         return;
     }

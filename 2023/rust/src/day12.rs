@@ -25,7 +25,7 @@ fn run(lines: &[String]) -> usize {
             let (springs, d_springs) = l.split_once(' ').unwrap();
 
             (
-                springs.chars().map(|c| Spring::from(c)).collect(),
+                springs.chars().map(Spring::from).collect(),
                 d_springs
                     .split(',')
                     .map(|s| s.parse::<u8>().unwrap())
@@ -43,11 +43,13 @@ fn compute_arrangements(
     evaluate_row(springs, d_springs, None, &mut cache)
 }
 
+type Cache<'a, 'b> = HashMap<(&'a [Spring], &'b [u8], Option<u8>), usize>;
+
 fn evaluate_row<'a, 'b>(
     springs: &'a [Spring],
     d_springs: &'b [u8],
     remaining_d: Option<u8>,
-    cache: &mut HashMap<(&'a [Spring], &'b [u8], Option<u8>), usize>,
+    cache: &mut Cache<'a, 'b>,
 ) -> usize {
     if let Some(ret) = cache.get(&(springs, d_springs, remaining_d)) {
         return *ret;
@@ -152,7 +154,8 @@ fn evaluate_row<'a, 'b>(
     }
 
     // Check all the damage groups has been consumed.
-    if (remaining_d == None || remaining_d == Some(0)) && i == d_springs.len() {
+    if (remaining_d.is_none() || remaining_d == Some(0)) && i == d_springs.len()
+    {
         return 1;
     }
 
@@ -161,10 +164,7 @@ fn evaluate_row<'a, 'b>(
 
 #[aoc(day12, part1)]
 fn part1(input: &str) -> usize {
-    run(&input
-        .lines()
-        .map(|x| String::from(x))
-        .collect::<Vec<String>>())
+    run(&input.lines().map(String::from).collect::<Vec<String>>())
 }
 
 #[aoc(day12, part2)]

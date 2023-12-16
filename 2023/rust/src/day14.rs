@@ -1,5 +1,5 @@
-use pathfinding::matrix::Matrix;
 use pathfinding::directed::cycle_detection::brent;
+use pathfinding::matrix::Matrix;
 
 fn tilt_north(dish: &mut Matrix<char>) {
     for c in 0..dish.columns {
@@ -16,7 +16,7 @@ fn tilt_north(dish: &mut Matrix<char>) {
                             dish[(r, c)] = '.';
                         }
                         rs = Some(n);
-                    },
+                    }
                     None => {
                         if r != 0 {
                             dish[(0, c)] = dish[(r, c)];
@@ -47,7 +47,7 @@ fn tilt_south(dish: &mut Matrix<char>) {
                             dish[(r, c)] = '.';
                         }
                         rs = Some(n);
-                    },
+                    }
                     None => {
                         if r != limit {
                             dish[(limit, c)] = dish[(r, c)];
@@ -77,7 +77,7 @@ fn tilt_west(dish: &mut Matrix<char>) {
                             dish[(r, c)] = '.';
                         }
                         cs = Some(n);
-                    },
+                    }
                     None => {
                         if c != 0 {
                             dish[(r, 0)] = dish[(r, c)];
@@ -108,7 +108,7 @@ fn tilt_east(dish: &mut Matrix<char>) {
                             dish[(r, c)] = '.';
                         }
                         cs = Some(n);
-                    },
+                    }
                     None => {
                         if c != limit {
                             dish[(r, limit)] = dish[(r, c)];
@@ -147,7 +147,10 @@ fn count_load(dish: &Matrix<char>) -> usize {
 #[aoc(day14, part1)]
 fn part1(input: &str) -> usize {
     let mut dish: Matrix<char> = Matrix::from_rows(
-        input.lines().take_while(|x| *x != "").map(|l| l.chars()),
+        input
+            .lines()
+            .take_while(|x| !x.is_empty())
+            .map(|l| l.chars()),
     )
     .unwrap();
     tilt_north(&mut dish);
@@ -157,15 +160,22 @@ fn part1(input: &str) -> usize {
 #[aoc(day14, part2)]
 fn part2(input: &str) -> usize {
     let dish: Matrix<char> = Matrix::from_rows(
-        input.lines().take_while(|x| *x != "").map(|l| l.chars()),
-    ).unwrap();
+        input
+            .lines()
+            .take_while(|x| !x.is_empty())
+            .map(|l| l.chars()),
+    )
+    .unwrap();
 
     const CYCLES: usize = 1_000_000_000;
     // Doing the billion cycle will take too much time. The dish patterns must
     // have some kind of cycle. Find out which it is, then compute only the
     // required steps.
     // Using brent's algorithm.
-    let (size, mut dish, start) = brent(dish, |mut d| {cycle(&mut d); d});
+    let (size, mut dish, start) = brent(dish, |mut d| {
+        cycle(&mut d);
+        d
+    });
 
     for _ in 0..(CYCLES - start) % (size) {
         cycle(&mut dish);

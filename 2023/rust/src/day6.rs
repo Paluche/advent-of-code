@@ -5,7 +5,9 @@ fn run(input: &str) -> usize {
 
     parse_numbers::<usize>(&lines.next().unwrap()["Time:".len()..])
         .iter()
-        .zip(parse_numbers::<usize>(&lines.next().unwrap()["Distance:".len()..]))
+        .zip(parse_numbers::<usize>(
+            &lines.next().unwrap()["Distance:".len()..],
+        ))
         .map(|(t, d)| {
             (0..*t)
                 .filter(|x| ((*t - x) * x) > d)

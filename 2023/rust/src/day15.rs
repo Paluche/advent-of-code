@@ -7,9 +7,9 @@ fn part1(input: &str) -> usize {
     input.split(',').map(|s| hash_algorithm(s.trim_end())).sum()
 }
 
-fn load(s:&str) -> (&str, usize, Option<usize>) {
-    let (label, focal) = if s.chars().last().unwrap() == '-' {
-        (&s[..s.len() - 1], None)
+fn load(s: &str) -> (&str, usize, Option<usize>) {
+    let (label, focal) = if let Some(x) = s.strip_suffix('-') {
+        (x, None)
     } else {
         let (label, focal) = s.split_once('=').unwrap();
         (label, Some(focal.parse::<usize>().unwrap()))
@@ -18,11 +18,10 @@ fn load(s:&str) -> (&str, usize, Option<usize>) {
     (label, hash_algorithm(label), focal)
 }
 
-fn parse_entry<'a>(s: &'a str, boxes: &mut Vec<Vec<(&'a str, usize)>>) {
+fn parse_entry<'a>(s: &'a str, boxes: &mut [Vec<(&'a str, usize)>]) {
     let (label, id, focal) = load(s.trim_end());
 
-    if let Some(position) = boxes[id].iter().position(|(l, _)| *l == label)
-    {
+    if let Some(position) = boxes[id].iter().position(|(l, _)| *l == label) {
         boxes[id].remove(position);
         if let Some(focal) = focal {
             boxes[id].insert(position, (label, focal));
