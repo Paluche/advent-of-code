@@ -5,13 +5,20 @@ fn parse_input(input: &str) -> Matrix<char> {
         .unwrap()
 }
 
-fn go(matrix: &Matrix<char>) -> Matrix<u8> {
+fn go(
+    matrix: &Matrix<char>,
+    start: (usize, usize),
+    direction: (isize, isize),
+) -> usize {
     let mut energized = Matrix::from_fn(matrix.rows, matrix.columns, |_| 0);
     let mut cache: Vec<((usize, usize), (isize, isize))> = Vec::new();
 
-    be_a_beam(&mut energized, &matrix, &mut cache, (0, 0), (0, 1));
+    be_a_beam(&mut energized, &matrix, &mut cache, start, direction);
 
     energized
+        .iter()
+        .map(|r| r.iter().filter(|x| **x > 0).count())
+        .sum()
 }
 
 fn be_a_beam(
@@ -75,8 +82,33 @@ fn be_a_beam(
 
 #[aoc(day16, part1)]
 fn part1(input: &str) -> usize {
-    go(&parse_input(input))
-        .iter()
-        .map(|r| r.iter().filter(|x| **x > 0).count())
-        .sum()
+    go(&parse_input(input), (0, 0), (0, 1))
+}
+
+#[aoc(day16, part2)]
+fn part2(input: &str) -> usize {
+    let matrix = parse_input(input);
+
+    (0..matrix.rows)
+        .map(|r| {
+            go(&matrix, (r, 0), (0, 1)).max(go(
+                &matrix,
+                (r, matrix.columns - 1),
+                (0, -1),
+            ))
+        })
+        .max()
+        .unwrap()
+        .max(
+            (0..matrix.columns)
+                .map(|c| {
+                    go(&matrix, (0, c), (1, 0)).max(go(
+                        &matrix,
+                        (matrix.rows - 1, c),
+                        (-1, 0),
+                    ))
+                })
+                .max()
+                .unwrap(),
+        )
 }
