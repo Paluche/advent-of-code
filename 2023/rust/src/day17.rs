@@ -5,15 +5,6 @@ use pathfinding::matrix::{
 };
 use std::hash::Hash;
 
-fn parse_input(input: &str) -> Matrix<u8> {
-    Matrix::from_rows(
-        input
-            .lines()
-            .map(|l| l.chars().map(|x| x.to_digit(10).unwrap() as u8)),
-    )
-    .unwrap()
-}
-
 type Direction = (isize, isize);
 
 fn opposed(direction: Direction) -> Direction {
@@ -48,6 +39,7 @@ impl Step {
         &self,
         map: &Matrix<u8>,
         direction: Direction,
+        min_move: usize,
         max_move: usize,
     ) -> Option<(Self, usize)> {
         let mut next_count = 1;
@@ -61,6 +53,7 @@ impl Step {
                 }
                 next_count = self.count + 1;
             } else if self_direction == opposed(direction)
+                || self.count < min_move
             {
                 // Do not go backward or not enough move to allow a turn yet.
                 return None;
@@ -80,19 +73,26 @@ impl Step {
     }
 }
 
-fn run(
-    map: &Matrix<u8>,
-    start: Position,
-    end: Position,
-    max_move: usize,
-) -> usize {
+fn run(input: &str, min_move: usize, max_move: usize) -> usize {
+    let map = Matrix::from_rows(
+        input
+            .lines()
+            .map(|l| l.chars().map(|x| x.to_digit(10).unwrap() as u8)),
+    )
+    .unwrap();
+
     dijkstra(
-        &Step::new_start(start),
-        |step| [N, E, S, W]
-            .iter()
-            .filter_map(|d| step.next(map, *d, max_move))
-            .collect::<Vec<(Step, usize)>>(),
-        |step| step.position == end,
+        &Step::new_start((0, 0)),
+        |step| {
+            [N, E, S, W]
+                .iter()
+                .filter_map(|d| step.next(&map, *d, min_move, max_move))
+                .collect::<Vec<(Step, usize)>>()
+        },
+        |step| {
+            step.position == (map.rows - 1, map.columns - 1)
+                && step.count >= min_move
+        },
     )
     .unwrap()
     .1
@@ -100,6 +100,10 @@ fn run(
 
 #[aoc(day17, part1)]
 fn part1(input: &str) -> usize {
-    let map = parse_input(input);
-    run(&map, (0, 0), (map.rows - 1, map.columns - 1), 3)
+    run(input, 1, 3)
+}
+
+#[aoc(day17, part2)]
+fn part2(input: &str) -> usize {
+    run(input, 4, 10)
 }
