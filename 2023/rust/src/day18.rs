@@ -1,41 +1,9 @@
-use crate::utils::print_matrix;
-use pathfinding::matrix::{
-    directions::{E, N, S, W},
-    Matrix,
-};
+use pathfinding::matrix::directions::{E, N, S, W};
 
 type Direction = (isize, isize);
 type Position = (isize, isize);
 
-#[derive(Clone, Copy)]
-struct Color {
-    red: u8,
-    green: u8,
-    blue: u8,
-}
-
-fn to_digit(chars: &mut std::str::Chars) -> u8 {
-    (chars.next().unwrap().to_digit(16).unwrap() * 16
-        + chars.next().unwrap().to_digit(16).unwrap()) as u8
-}
-
-impl Color {
-    fn from_str(input: &str) -> Self {
-        let mut chars = input.strip_prefix("(#").unwrap().chars();
-
-        let ret = Self {
-            red: to_digit(&mut chars),
-            green: to_digit(&mut chars),
-            blue: to_digit(&mut chars),
-        };
-
-        assert_eq!(chars.next().unwrap(), ')');
-
-        ret
-    }
-}
-
-fn parse_input(input: &str) -> Vec<(Direction, isize, Color)> {
+fn parse_input_1(input: &str) -> Vec<(Direction, isize)> {
     input
         .lines()
         .map(|line| {
@@ -51,175 +19,97 @@ fn parse_input(input: &str) -> Vec<(Direction, isize, Color)> {
 
             let count = a.next().unwrap().parse::<isize>().unwrap();
 
-            (direction, count, Color::from_str(a.next().unwrap()))
+            (direction, count)
         })
         .collect()
 }
 
-fn get_edge(
-    instructions: &[(Direction, isize, Color)],
-) -> Vec<(Position, Direction, Color)> {
-    // Run the instructions to determinate the list of points that makes the
-    // edge.
-    let mut position: Position = (0, 0);
-    let mut edge: Vec<(Position, Direction, Color)> = Vec::new();
+fn parse_input_2(input: &str) -> Vec<(Direction, isize)> {
+    let ret: Vec<(Direction, isize)> = input
+        .lines()
+        .map(|line| {
+            let (_, a) = line.split_once('#').unwrap();
 
-    instructions.iter().for_each(|instruction| {
-        for _ in 0..instruction.1 {
-            position =
-                (position.0 + instruction.0 .0, position.1 + instruction.0 .1);
+            let count = isize::from_str_radix(&a[..5], 16).unwrap();
 
-            edge.push((position, instruction.0, instruction.2));
-        }
-    });
-
-    edge
-}
-
-fn get_wise(directions: Vec<Direction>) -> isize {
-    directions
-        .iter()
-        .fold((0, (0, 0)), |(mut w, ld), d| {
-            if ld == (0, 0) {
-                return (w, *d);
-            }
-
-            w += match ld {
-                S => match *d {
-                    S => 0,
-                    W => 1,
-                    E => -1,
-                    _ => panic!(),
-                },
-                W => match *d {
-                    S => -1,
-                    N => 1,
-                    W => 0,
-                    _ => panic!(),
-                },
-                N => match *d {
-                    N => 0,
-                    E => 1,
-                    W => -1,
-                    _ => panic!(),
-                },
-                E => match *d {
-                    N => -1,
-                    E => 0,
-                    S => 1,
-                    _ => panic!(),
-                },
+            let direction = match &a[5..6] {
+                "0" => E,
+                "1" => S,
+                "2" => W,
+                "3" => N,
                 _ => panic!(),
             };
 
-            (w, *d)
+            (direction, count)
         })
-        .0
+        .collect();
+
+    ret
 }
 
-fn to_inside(direction: &Direction, edge_wise: isize) -> bool {
-    match *direction {
-        N => edge_wise > 0,
-        E => false,
-        S => edge_wise < 0,
-        W => false,
-        _ => panic!(),
+fn get_corners(instructions: &[(Direction, isize)]) -> (Vec<Position>, isize) {
+    let mut ret: Vec<Position> = vec![(0, 0)];
+    // The coordonates points to the middle of the edge trench.
+    // Half of the trench is outside the edge.
+    // The Shoelace formula will compute the area inside the middle, we need to
+    // add only half of the width taken by the edge trench. The other half is
+    // included in the shoelace formula result.
+    // But actually it is a little more than the half that we must add. On each
+    // corner, the area computed by the shoelace formula is actually one or
+    // three quarters of the space dug. So they mostly compensate each other
+    // excepted for 4 corners which actually makes the edge being a loop, on
+    // those four corners 3 quarters are not included in the area. 2 quarters
+    // are included by half of the perimeter, rest 1 quarters time four makes
+    // 1 more. As it is later divided by 2, the perimeter variable is
+    // initialized to 2.
+    let mut perimeter: isize = 2;
+
+    for (i, (direction, count)) in instructions.iter().enumerate() {
+        let position = (
+            ret[i].0 + *count * direction.0,
+            ret[i].1 + *count * direction.1,
+        );
+
+        perimeter += *count;
+
+        ret.push(position);
     }
-}
-fn from_inside(direction: &Direction, edge_wise: isize) -> bool {
-    match *direction {
-        N => edge_wise < 0,
-        E => false,
-        S => edge_wise > 0,
-        W => false,
-        _ => panic!(),
-    }
+
+    // Delay the division by 2, to the last moment. If we do it at each count,
+    // we will loose data, count is not necessary an even number. By the total
+    // will be as the shape in a loop and count is not a float.
+    (ret, perimeter / 2)
 }
 
-/// Get the points that compose the area within a loop.
-fn get_area(
-    edge: &[((isize, isize), Direction, Color)],
-) -> Vec<(isize, isize)> {
-    let edge_wise = get_wise(edge.iter().map(|(_, d, _)| *d).collect());
+fn run(instructions: &[(Direction, isize)]) -> isize {
+    // Shoelace formula. Compute the area of a surface based on the coordinates
+    // of the points forming it.
+    // X = columns
+    // Y = rows
+    // For each line (AB), take the coordinates of the two dots delimiting the
+    // line. Do Ax * By = Bx * Ay. Sum all the results and divide by two.
+    //
+    // https://en.wikipedia.org/wiki/Shoelace_formula
+    //
+    // The edge is "luckily" oriented counter-clock-wise so the result of the
+    // shoelace formula will be positive.
+    let (corners, perimeter) = get_corners(instructions);
 
-    println!("Edge wise: {edge_wise}");
+    let area = corners
+        .windows(2)
+        .map(|w| w[0].1 * w[1].0 - w[0].0 * w[1].1)
+        .sum::<isize>()
+        / 2;
 
-    let edge:Vec<(Position, bool, bool)> = edge.windows(2).map(|w| {
-        let (cur_pos, cur_dir, _) = w[0];
-        let (_, next_dir, _) = w[1];
-        (cur_pos,
-         to_inside(&cur_dir, edge_wise) || to_inside(&next_dir, edge_wise),
-         from_inside(&cur_dir, edge_wise) || from_inside(&next_dir, edge_wise)
-        )
-    }).collect();
-
-    edge.iter()
-        .filter_map(|((cur_row, cur_col), cur_to_inside, _)| {
-            let mut ret: Vec<Position> = Vec::new();
-
-            // Get the distance to the closest next point to the left that is on
-            // the same row.
-            let (next_col, next_from_inside) = match edge
-                .iter()
-                .filter_map(|((next_row, next_col), _, next_from_inside)| {
-                    if (cur_row == next_row) && (cur_col < next_col) {
-                        Some((*next_col, *next_from_inside))
-                    } else {
-                        None
-                    }
-                })
-                .min_by(|(a, _), (b, _)| a.cmp(b))
-            {
-                Some(x) => x,
-                None => return None,
-            };
-
-            if *cur_to_inside || next_from_inside {
-                for i in cur_col + 1..next_col {
-                    ret.push((*cur_row, i));
-                }
-            }
-
-            Some(ret)
-        })
-        .flatten()
-        .collect()
-}
-
-fn run(
-    instructions: &[(Direction, isize, Color)],
-) -> (Vec<Position>, Vec<Position>) {
-    let edge = get_edge(instructions);
-
-    (
-        edge.iter().map(|(pos, _, _)| *pos).collect(),
-        get_area(&edge),
-    )
+    area + perimeter
 }
 
 #[aoc(day18, part1)]
-fn part1(input: &str) -> usize {
-    let (edge, area) = run(&parse_input(input));
+fn part1(input: &str) -> isize {
+    run(&parse_input_1(input))
+}
 
-    let min_row = edge.iter().map(|(row, _)| row).min().unwrap();
-    let max_row = edge.iter().map(|(row, _)| row).max().unwrap();
-    let min_col = edge.iter().map(|(_, col)| col).min().unwrap();
-    let max_col = edge.iter().map(|(_, col)| col).max().unwrap();
-
-    let mut matrix: Matrix<char> = Matrix::from_fn(
-        (max_row - min_row + 1) as usize,
-        (max_col - min_col + 1) as usize,
-        |_| '.',
-    );
-
-    area.iter().for_each(|(r, c)| {
-        matrix[((r - min_row) as usize, (c - min_col) as usize)] = 'O'
-    });
-    edge.iter().for_each(|(r, c)| {
-        matrix[((r - min_row) as usize, (c - min_col) as usize)] = '#'
-    });
-
-    print_matrix(&matrix);
-
-    edge.len() + area.len()
+#[aoc(day18, part2)]
+fn part2(input: &str) -> isize {
+    run(&parse_input_2(input))
 }
