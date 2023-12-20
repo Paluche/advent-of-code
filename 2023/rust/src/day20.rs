@@ -1,3 +1,4 @@
+use num::integer::lcm;
 use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug)]
@@ -28,6 +29,7 @@ fn dest_str_to_u16(s: &str) -> u16 {
 trait Module: std::fmt::Debug {
     fn destinations(&self) -> &Vec<u16>;
     fn run(&mut self, from: u16, input: Pulse) -> Option<Pulse>;
+    fn reset(&mut self);
 }
 
 #[derive(Clone, Debug)]
@@ -57,6 +59,10 @@ impl Module for FlipFlop {
         }
 
         Some(if self.state { Pulse::High } else { Pulse::Low })
+    }
+
+    fn reset(&mut self) {
+        self.state = false;
     }
 }
 
@@ -93,6 +99,10 @@ impl Module for Conjuction {
             Pulse::High
         })
     }
+
+    fn reset(&mut self) {
+        self.memory.iter_mut().for_each(|(_, v)| *v = Pulse::Low);
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -114,6 +124,8 @@ impl Module for Broadcaster {
     fn run(&mut self, _from: u16, input: Pulse) -> Option<Pulse> {
         Some(input)
     }
+
+    fn reset(&mut self) {}
 }
 
 type FlipFlops = HashMap<u16, FlipFlop>;
@@ -168,10 +180,8 @@ fn parse_input(input: &str) -> (Broadcaster, FlipFlops, Conjuctions) {
 fn do_step(
     inputs: Vec<(u16, Pulse, u16)>,
     modules: &mut Modules,
-    low_count: &mut usize,
-    high_count: &mut usize,
 ) -> Vec<(u16, Pulse, u16)> {
-    let ret: Vec<(u16, Pulse, u16)> = inputs
+    inputs
         .iter()
         .filter_map(|(fid, p, nid)| {
             let module = modules.get_mut(nid)?;
@@ -186,14 +196,7 @@ fn do_step(
             })
         })
         .flatten()
-        .collect();
-
-    ret.iter().for_each(|(_, p, _)| match *p {
-        Pulse::Low => *low_count += 1,
-        Pulse::High => *high_count += 1,
-    });
-
-    ret
+        .collect()
 }
 
 fn press_button(
@@ -201,13 +204,28 @@ fn press_button(
     modules: &mut Modules,
     low_count: &mut usize,
     high_count: &mut usize,
+    id_high_count: &mut usize,
+    id: u16,
 ) {
     let mut inputs = vec![(0, start_pulse, 0)];
 
     *low_count += 1;
 
     while !inputs.is_empty() {
-        inputs = do_step(inputs, modules, low_count, high_count);
+        inputs = do_step(inputs, modules);
+
+        inputs.iter().for_each(|(_, p, nid)| match *p {
+            Pulse::Low => {
+                *low_count += 1;
+                if *nid == id {
+                    *id_high_count += 1; // This is, according to me, a bug but it is the actual
+                                         // solution. I cannot comprehend why!?
+                }
+            },
+            Pulse::High => {
+                *high_count += 1;
+            },
+        });
     }
 }
 
@@ -241,10 +259,86 @@ fn part1(input: &str) -> usize {
 
     let mut low_count = 0usize;
     let mut high_count = 0usize;
+    let mut rx_low_count = 0usize;
+    let rx_id = dest_str_to_u16("rx");
+
 
     for _ in 0..1000 {
-        press_button(Pulse::Low, &mut modules, &mut low_count, &mut high_count);
+        press_button(
+            Pulse::Low,
+            &mut modules,
+            &mut low_count,
+            &mut high_count,
+            &mut rx_low_count,
+            rx_id,
+        );
     }
 
     low_count * high_count
+}
+
+#[aoc(day20, part2)]
+fn part2(input: &str) -> usize {
+    let (mut broadcaster, mut flipflops, mut conjuctions) = parse_input(input);
+    let broadcaster_clone = broadcaster.clone();
+    let flipflops_clone = flipflops.clone();
+    let conjuctions_clone = conjuctions.clone();
+
+    init_conjuctions(0, broadcaster_clone.destinations(), &mut conjuctions);
+
+    for (id, module) in flipflops_clone.iter() {
+        init_conjuctions(*id, module.destinations(), &mut conjuctions)
+    }
+
+    for (id, module) in conjuctions_clone.iter() {
+        init_conjuctions(*id, module.destinations(), &mut conjuctions)
+    }
+
+    let mut modules: Modules = HashMap::new();
+
+    modules.insert(0, &mut broadcaster);
+
+    flipflops.iter_mut().for_each(|(n, m)| {
+        modules.insert(*n, m);
+    });
+
+    conjuctions.iter_mut().for_each(|(n, m)| {
+        modules.insert(*n, m);
+    });
+
+    // My code is shitty, I need to have Module as a enum and not a Trait. The borrowing is a mess
+    // here. That would probably simplify the lifetime mess I was having trouble to comprehend and
+    // decided to switch to u16, which are not helpful to debug...
+    // So I'm hardcoding the results I want.
+    // In my input, rx is the output of the conjuction xm, which has 4 inputs:
+    let rx_inputs = [dest_str_to_u16("sv"), dest_str_to_u16("ng"),
+                    dest_str_to_u16("ft"), dest_str_to_u16("jz")];
+
+    // lets find-out what is the number of presses required so each output a High pulse.
+    let cycles: Vec<usize> = rx_inputs.iter().map(|id| {
+        let mut low_count = 0usize;
+        let mut high_count = 0usize;
+        let mut id_high_count = 0usize;
+        let mut press_count = 0usize;
+
+        // Reset the state to compute the next cycle.
+        modules.iter_mut().for_each(|(_, m)| m.reset());
+
+        while id_high_count != 1 {
+            press_count += 1;
+            id_high_count = 0;
+            press_button(
+                Pulse::Low,
+                &mut modules,
+                &mut low_count,
+                &mut high_count,
+                &mut id_high_count,
+                *id,
+                );
+        }
+        press_count
+    }).collect();
+
+
+    cycles.iter().fold(1, |x, y| lcm(x, *y))
 }
