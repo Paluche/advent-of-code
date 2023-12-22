@@ -56,3 +56,23 @@ fn part1(input: &str) -> usize {
     })
     .len()
 }
+
+// Plan for part 2.
+// => Create a cache where we remember all the result within one original map.
+// The elf move one step at a time, so the starting points are
+//  - The S case,
+//  - All cases on the row 0
+//  - All cases on the row map.rows - 1
+//  - All cases on the columns 0
+//  - All cases on the columns map.columns - 1
+
+// The output will be a list of positions on the outside edge of the map, with a list
+// of number of step that can lead to that position. Then
+
+// At a certain number of steps the map will be fully accessible. No interest
+// in computing those points anymore..
+//
+// That certain number of step will create some pattern positions on the
+// neighbors map.
+//
+//
