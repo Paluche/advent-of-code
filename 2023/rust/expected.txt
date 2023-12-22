@@ -38,3 +38,6 @@ Day 19 - part 1: 287054
 Day 19 - part 2: 131619440296497
 Day 20 - part 1: 788081152
 Day 20 - part 2: 224602011344203
+Day 21 - part 1: 3731
+Day 22 - part 1: 398
+Day 22 - part 2: 70727
