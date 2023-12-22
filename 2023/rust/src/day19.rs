@@ -1,5 +1,7 @@
 use std::{cmp::Ordering, collections::HashMap};
 
+type Range = (usize, usize);
+
 fn in_range(i: usize, min: usize, max: usize) -> Ordering {
     if i < min {
         Ordering::Less
@@ -64,10 +66,10 @@ impl<'a> Rule<'a> {
     fn process_range(
         &self,
         category: &str,
-        (min, max): (usize, usize),
-    ) -> Option<(usize, usize, &'a str, Option<(usize, usize)>)> {
+        (min, max): Range,
+    ) -> Option<(Range, &'a str, Option<Range>)> {
         if self.category == "default" {
-            Some((min, max, self.destination, None))
+            Some(((min, max), self.destination, None))
         } else if self.category == category {
             match self.order {
                 Ordering::Less => match in_range(self.limit, min, max) {
@@ -80,8 +82,7 @@ impl<'a> Rule<'a> {
                         // The limit is within the range. The condition is
                         // meant for part of the range.
                         Some((
-                            min,
-                            self.limit - 1,
+                            (min, self.limit - 1),
                             self.destination,
                             Some((self.limit, max)),
                         ))
@@ -89,21 +90,20 @@ impl<'a> Rule<'a> {
                     Ordering::Greater => {
                         // The range is lesser than the limit. The condition
                         // is meant for the whole range.
-                        Some((min, max, self.destination, None))
+                        Some(((min, max), self.destination, None))
                     }
                 },
                 Ordering::Greater => match in_range(self.limit, min, max) {
                     Ordering::Less => {
                         // The range is grater than the limit. The condition
                         // is meant for the whole range.
-                        Some((min, max, self.destination, None))
+                        Some(((min, max), self.destination, None))
                     }
                     Ordering::Equal => {
                         // The limit is within the range. The condition is
                         // meant for part of the range.
                         Some((
-                            self.limit + 1,
-                            max,
+                            (self.limit + 1, max),
                             self.destination,
                             Some((min, self.limit)),
                         ))
@@ -217,7 +217,7 @@ fn process_combination<'a>(
             let cat_range: (usize, usize) =
                 *combination.get(rule.category).unwrap();
 
-            if let Some((next_min, next_max, next_dest, rest)) =
+            if let Some(((next_min, next_max), next_dest, rest)) =
                 rule.process_range(rule.category, cat_range)
             {
                 let mut next_combination: Combination = HashMap::new();
