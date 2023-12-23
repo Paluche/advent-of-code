@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use pathfinding::matrix::{
     directions::{E, N, S, W},
     Matrix,
@@ -7,6 +6,7 @@ use pathfinding::matrix::{
 type Position = (usize, usize);
 type Direction = (isize, isize);
 
+#[derive(Copy, Clone)]
 enum Terrain {
     Path,
     Forest,
@@ -25,32 +25,42 @@ impl Terrain {
             _ => panic!(),
         }
     }
+
+    fn is_path(&self) -> bool {
+        matches!(self, Self::Path)
+    }
 }
 
 fn next(
     map: &Matrix<Terrain>,
     start: Position,
     direction: Direction,
-    weight: usize,
-) -> Option<(Position, usize)> {
+) -> Option<Position> {
     let position = map.move_in_direction(start, direction)?;
 
-    let weight = weight + 1;
-
     match map[position] {
-        Terrain::Path => Some((position, weight)),
+        Terrain::Path | Terrain::Slope(_) => Some(position),
         Terrain::Forest => None,
-        Terrain::Slope(d) => next(map, position, d, weight),
     }
 }
 
 fn successors(
     map: &Matrix<Terrain>,
     start: Position,
-) -> Vec<(Position, usize)> {
-    [N, E, S, W]
+    part2: bool,
+) -> Vec<Position> {
+    let terrain = map[start];
+    let directions = if part2 || terrain.is_path() {
+        vec![N, E, S, W]
+    } else if let Terrain::Slope(d) = terrain {
+        vec![d]
+    } else {
+        panic!()
+    };
+
+    directions
         .iter()
-        .filter_map(|&d| next(map, start, d, 0))
+        .filter_map(|&d| next(map, start, d))
         .collect()
 }
 
@@ -80,46 +90,113 @@ fn parse_input(input: &str) -> (Matrix<Terrain>, Position, Position) {
     (map, start, end)
 }
 
-#[aoc(day23, part1)]
-fn part1(input: &str) -> usize {
-    let (map, start, end) = parse_input(input);
+#[derive(Clone)]
+struct Path {
+    position: Position,
+    previous: Option<Box<Self>>,
+}
 
-    let mut ways: Vec<(Position, usize, HashSet<Position>)> = vec![(start, 0, HashSet::new())];
-    let mut ok_ways: Vec<usize> = Vec::new();
+impl Path {
+    fn root(position: Position) -> Self {
+        Self {
+            previous: None,
+            position,
+        }
+    }
 
-    while !ways.is_empty() {
-        ways = ways.iter().filter_map(|(position, weight, path)| {
-            let next: Vec<(Position, usize)> = successors(&map, *position)
-                .iter()
-                .filter_map(|(pos, weight)| if path.contains(pos) {
-                    None
-                } else {
-                    Some((*pos, *weight))
-                })
-                .collect();
+    fn new(previous: &Self, position: Position) -> Self {
+        Self {
+            previous: Some(Box::new(previous.clone())),
+            position,
+        }
+    }
 
-            if next.is_empty() {
-                return None;
+    fn contains(&self, position: Position) -> bool {
+        let mut current = Some(self);
+
+        while current.is_some() {
+            if current.unwrap().position == position {
+                return true;
             }
 
-            Some(next.iter().filter_map(|(position, next_weight)| {
-                let mut path = path.clone();
-
-                path.insert(*position);
-
-                if *position == end {
-                    ok_ways.push(weight + next_weight);
-                    None
-                } else {
-                    Some((*position, weight + next_weight, path))
-                }
-            }).collect::<Vec<(Position, usize, HashSet<Position>)>>()
-            )
+            current = self.previous.as_deref();
         }
-        )
-        .flatten()
-        .collect();
+
+        false
+    }
+
+    fn weight(&self) -> usize {
+        let mut current = Some(self);
+        let mut ret = 0;
+
+        while current.is_some() {
+            ret += 1;
+            current = self.previous.as_deref();
+        }
+
+        ret
+    }
+}
+
+fn run(input: &str, part2: bool) -> usize {
+    let (map, start, end) = parse_input(input);
+
+    let mut ways: Vec<Path> = vec![Path::root(start)];
+    let mut ok_ways: Vec<usize> = Vec::new();
+
+    loop {
+        if ways.is_empty() {
+            break;
+        }
+
+        let next_ways: Vec<Path> = ways
+            .iter()
+            .filter_map(|path| {
+                let next: Vec<Position> =
+                    successors(&map, path.position, part2)
+                        .iter()
+                        .filter_map(|&pos| {
+                            if path.contains(pos) {
+                                None
+                            } else {
+                                Some(pos)
+                            }
+                        })
+                        .collect();
+
+                if next.is_empty() {
+                    return None;
+                }
+
+                Some(
+                    next.iter()
+                        .filter_map(|&position| {
+                            let next_path = Path::new(path, position);
+
+                            if position == end {
+                                ok_ways.push(path.weight());
+                                None
+                            } else {
+                                Some(next_path)
+                            }
+                        })
+                        .collect::<Vec<Path>>(),
+                )
+            })
+            .flatten()
+            .collect();
+        ways = next_ways;
     }
 
     *ok_ways.iter().max().unwrap()
+}
+
+#[aoc(day23, part1)]
+fn part1(input: &str) -> usize {
+    run(input, false)
+}
+
+#[aoc(day23, part2)]
+fn part2(input: &str) -> usize {
+    0 // run(input, true)
 }
