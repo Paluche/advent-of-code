@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 aoc = { git = "https://github.com/evenfurther/aoc" }
 eyre = "0.6.9"
+nalgebra = "0.32.3"
 num = "0.4.1"
 pathfinding = "4.4.0"
 
