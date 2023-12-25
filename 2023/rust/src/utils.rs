@@ -1,4 +1,5 @@
 use core::fmt::Display;
+use num::Integer;
 use pathfinding::matrix::Matrix;
 
 pub fn parse_numbers<T: std::str::FromStr>(s: &str) -> Vec<T> {
@@ -23,4 +24,20 @@ pub fn print_matrix<T: Display>(matrix: &Matrix<T>) {
         println!();
     }
     println!();
+}
+
+pub fn shoelace<T>(points: &[(T, T)]) -> usize
+where
+    T: TryInto<isize> + std::ops::Mul + std::ops::Sub + Copy,
+{
+    (points
+        .windows(2)
+        .map(|w| {
+            w[0].1.try_into().ok().unwrap() * w[1].0.try_into().ok().unwrap()
+                - w[0].0.try_into().ok().unwrap()
+                    * w[1].1.try_into().ok().unwrap()
+        })
+        .sum::<isize>()
+        / 2_isize)
+        .unsigned_abs()
 }

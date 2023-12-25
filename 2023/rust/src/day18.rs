@@ -1,4 +1,5 @@
 use pathfinding::matrix::directions::{E, N, S, W};
+use crate::utils::shoelace;
 
 type Direction = (isize, isize);
 type Position = (isize, isize);
@@ -47,9 +48,9 @@ fn parse_input_2(input: &str) -> Vec<(Direction, isize)> {
     ret
 }
 
-fn get_corners(instructions: &[(Direction, isize)]) -> (Vec<Position>, isize) {
+fn get_corners(instructions: &[(Direction, isize)]) -> (Vec<Position>, usize) {
     let mut ret: Vec<Position> = vec![(0, 0)];
-    // The coordonates points to the middle of the edge trench.
+    // The coordinates points to the middle of the edge trench.
     // Half of the trench is outside the edge.
     // The Shoelace formula will compute the area inside the middle, we need to
     // add only half of the width taken by the edge trench. The other half is
@@ -78,10 +79,10 @@ fn get_corners(instructions: &[(Direction, isize)]) -> (Vec<Position>, isize) {
     // Delay the division by 2, to the last moment. If we do it at each count,
     // we will loose data, count is not necessary an even number. By the total
     // will be as the shape in a loop and count is not a float.
-    (ret, perimeter / 2)
+    (ret, (perimeter / 2) as usize)
 }
 
-fn run(instructions: &[(Direction, isize)]) -> isize {
+fn run(instructions: &[(Direction, isize)]) -> usize {
     // Shoelace formula. Compute the area of a surface based on the coordinates
     // of the points forming it.
     // X = columns
@@ -95,21 +96,15 @@ fn run(instructions: &[(Direction, isize)]) -> isize {
     // shoelace formula will be positive.
     let (corners, perimeter) = get_corners(instructions);
 
-    let area = corners
-        .windows(2)
-        .map(|w| w[0].1 * w[1].0 - w[0].0 * w[1].1)
-        .sum::<isize>()
-        / 2;
-
-    area + perimeter
+    shoelace(&corners) + perimeter
 }
 
 #[aoc(day18, part1)]
-fn part1(input: &str) -> isize {
+fn part1(input: &str) -> usize {
     run(&parse_input_1(input))
 }
 
 #[aoc(day18, part2)]
-fn part2(input: &str) -> isize {
+fn part2(input: &str) -> usize {
     run(&parse_input_2(input))
 }

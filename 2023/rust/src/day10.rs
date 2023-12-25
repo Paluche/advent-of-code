@@ -5,6 +5,7 @@ use pathfinding::{
         Matrix,
     },
 };
+use crate::utils::shoelace;
 
 fn find_entry(matrix: &Matrix<char>) -> Position {
     for (i, row) in matrix.iter().enumerate() {
@@ -52,12 +53,6 @@ fn part1(input: &str) -> usize {
 }
 
 #[aoc(day10, part2)]
-fn part2(input: &str) -> isize {
-    // Shoelace formula.
-    (parse_input(input)
-        .windows(2)
-        .map(|w| (w[0].1 * w[1].0) as isize - (w[0].0 * w[1].1) as isize)
-        .sum::<isize>()
-        / 2_isize)
-        .abs()
+fn part2(input: &str) -> usize {
+    shoelace::<usize>(&parse_input(input))
 }
