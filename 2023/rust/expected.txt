@@ -42,3 +42,4 @@ Day 21 - part 1: 3731
 Day 22 - part 1: 398
 Day 22 - part 2: 70727
 Day 24 - part 1: 29142
+Day 25 - part 1: 546804
