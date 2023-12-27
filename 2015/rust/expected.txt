@@ -1,2 +1,4 @@
 Day 1 - part 1: 232
 Day 1 - part 2: 1782
+Day 2 - part 1: 1588178
+Day 2 - part 2: 3783758
