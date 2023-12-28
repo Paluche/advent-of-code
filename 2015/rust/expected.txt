@@ -20,3 +20,5 @@ Day 10 - part 1: 492982
 Day 10 - part 2: 6989950
 Day 11 - part 1: vzbxxyzz
 Day 11 - part 2: vzcaabcc
+Day 12 - part 1: 111754
+Day 12 - part 2: 65402

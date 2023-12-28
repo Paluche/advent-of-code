@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 aoc = { git = "https://github.com/evenfurther/aoc" }
 eyre = "0.6.9"
+json = "0.12.4"
 md5 = "0.7.0"
 pathfinding = "4.8.0"
 
