@@ -18,3 +18,5 @@ Day 9 - part 1: 251
 Day 9 - part 2: 898
 Day 10 - part 1: 492982
 Day 10 - part 2: 6989950
+Day 11 - part 1: vzbxxyzz
+Day 11 - part 2: vzcaabcc
