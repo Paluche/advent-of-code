@@ -32,3 +32,5 @@ Day 16 - part 1: 103
 Day 16 - part 2: 405
 Day 17 - part 1: 654
 Day 17 - part 2: 57
+Day 18 - part 1: 814
+Day 18 - part 2: 924
