@@ -44,3 +44,5 @@ Day 22 - part 1: 953
 Day 22 - part 2: 1289
 Day 23 - part 1: 184
 Day 23 - part 2: 231
+Day 24 - part 1: 10439961859
+Day 24 - part 2: 72050269
