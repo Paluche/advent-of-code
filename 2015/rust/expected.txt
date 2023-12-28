@@ -30,3 +30,5 @@ Day 15 - part 1: 13882464
 Day 15 - part 2: 11171160
 Day 16 - part 1: 103
 Day 16 - part 2: 405
+Day 17 - part 1: 654
+Day 17 - part 2: 57
