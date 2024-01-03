@@ -16,3 +16,5 @@ Day 8 - part 1: 115
 Day 8 - part 2: EFEYKFRFIJ
 Day 9 - part 1: 70186
 Day 9 - part 2: 10915059201
+Day 10 - part 1: 93
+Day 10 - part 2: 47101
