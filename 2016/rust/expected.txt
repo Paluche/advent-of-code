@@ -4,3 +4,5 @@ Day 2 - part 1: 33444
 Day 2 - part 2: 446A6
 Day 3 - part 1: 1050
 Day 3 - part 2: 1921
+Day 4 - part 1: 361724
+Day 4 - part 2: 482
