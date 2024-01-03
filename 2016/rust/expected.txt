@@ -6,3 +6,5 @@ Day 3 - part 1: 1050
 Day 3 - part 2: 1921
 Day 4 - part 1: 361724
 Day 4 - part 2: 482
+Day 5 - part 1: f97c354d
+Day 5 - part 2: 863dde27
