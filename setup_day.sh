@@ -31,5 +31,3 @@ echo "pub mod day$DAY;" >> "$DIR/src/lib.rs"
   cargo fmt
   cd -
 }
-git add "$YEAR/"
-git commit -m "$YEAR: day $DAY"
