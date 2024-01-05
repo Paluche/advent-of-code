@@ -20,7 +20,7 @@ then
   printf "\n" >> "$DIR/src/lib.rs"
 fi
 
-printf "#[aoc(day%s, part1)]\nfn part1(input: &str) -> usize {\n    0\n}\n\n//#[aoc(day%s, part2)]\n//fn part2(input: &str) -> usize {\n//    0\n//}\n"\
+printf "fn parse_input(input: &str) -> () {\n\n}\n\n#[aoc(day%s, part1)]\nfn part1(input: &str) -> usize {\n    0\n}\n\n//#[aoc(day%s, part2)]\n//fn part2(input: &str) -> usize {\n//    0\n//}\n"\
   "$DAY" "$DAY" > "$DIR/src/day$DAY.rs"
 
 curl --cookie ./cookies.txt "https://adventofcode.com/$YEAR/day/$DAY/input" > "$DIR/input/day$DAY.txt"
